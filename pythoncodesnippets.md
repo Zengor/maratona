@@ -32,11 +32,51 @@ def char_range(c1, c2):
         yield chr(c)
 ```
 Usar simplesmente como `for c in char_range('c', 'k')`
-
-# Disjoint set / Connected Components
-Segue uma implementação, incluindo exemplo de uso:
+# Graphs
+Dada uma representação simples (lista de adjacência) de um grafo
 ```py
-def connected_components(edges, vertices):
+	graph = {'A': ['B', 'C'],
+             'B': ['C', 'D'],
+             'C': ['D'],
+             'D': ['C'],
+             'E': ['F'],
+             'F': ['C']
+			 
+```
+Para usar pesos, podemos fazer cada entrada na lista de adjacência ser uma tupla (e.g `'A':[('B',10)]`), ou ter um segundo dicionário indexado por tuplas `(u,v)`. **Dependendo de como isso for feito, é necessário mudar várias implementações abaixo.** Por questão de simplicidade, estou assumindo que `weights` é um dicionário diferente
+Uma implementação de nó que pode ser usada na estrutura acima (é hasheável):
+```py
+class Node:
+    def __init__(self, index, data):
+        self.index = index
+        self.data = data
+    def __hash__(self):
+        return self.index
+```
+É fácil adicionar mais variáveis se necessário. Pode ser uma boa ideia trocar `__hash__` para o seguinte dependendo da situação.
+```py
+	def __repr__(self):
+		return str(self.index)
+```
+Funções básicas
+```py
+def vertices(g):
+    return list(k for k in g.keys())
+def edges(g):
+    return list((a,b) for a,v in g.items() for b in v)
+# OU, SE O INTUITO FOR ITERAR:
+def vertices_iter(g):
+    return g.keys()
+def edges_iter(g):
+    return ((a,b) for a,v in g.items() for b in v)
+
+def bfs(g):
+def dfs(g):
+```
+## Disjoint set / Connected Components
+
+```py
+def connected_components(g):
     ##############
     def make_set(x):
         return [x]
@@ -48,20 +88,37 @@ def connected_components(edges, vertices):
         set_lookup.update( { s:a_set for s in b_set } )
         sets.remove(b_set)
     #############
-    sets = [make_set(v)  for v in vertices]
-    set_lookup = { s:sets[i] for i,s in enumerate(vertices) }
-	# assume-se que edges são tuplas
-    for (u,v) in edges:
+    sets = [make_set(v)  for v in vertices_iter(g)]
+    set_lookup = { s:sets[i] for i,s in enumerate(vertices_iter(g)) }
+    for (u,v) in edges_iter(g):
         if find_set(u) != find_set(v):
             union(u,v)
     return sets
-# Uso abaixo ####	
-import string
-vertices = string.ascii_lowercase[:10]
-edges = [('b', 'd'), ('e', 'g'), ('a', 'c'), ('h', 'i'), ('a', 'b'), ('e', 'f'), ('b', 'c')]
-print(connected_components(edges, vertices))
-
 ```
+## Kruskal (minimum spanning tree)
+Kruskal depende de conjuntos disjuntos, então usa as mesmas três funções base
+```py
+def kruskal(g, weights):
+    from heapq import heapify, heapop
+    ## make_set, find_set, union ##
+    sets = [make_set(v)  for v in vertices_iter(g)]
+    set_lookup = { s:sets[i] for i,s in enumerate(vertices_iter(g)) }
+    # queremos um priority queue das edges ordenados pelo maior peso
+    # então precisamos inverter os pesos (heapq é ordenado pelo menor).
+    # para fazer uma maximum spanning tree, inverter o peso
+    edgeq = list((-w,e) for e,w in weights.items())
+    heapify(edgeq)
+    tree = []
+    while edgeq:
+        (w, (u,v)) = heappop(edgeq)
+        if find_set(u) != find_set(v):
+            tree.append((u,v))
+            union(u,v)
+```
+# Shortest Paths
+## Dags com peso (baseado em ordenação topológica)
+## Dijkstra
+## Floyd-Warshal
 
 # Format strings
 ## Basic
@@ -74,13 +131,13 @@ print(connected_components(edges, vertices))
 ```
 ## Padding
 Espaços vazios representados como `_`  nos comentários
-*Nota* Números tem default de right-align, string left-align
+**Nota** Números tem default de right-align, string left-align
 ```py
 '{:5}'.format(10) #-> '___10'
 '{:>5}'.format('asd') #-> '__asd' (force right-alignment
 '{:<5}'.format(10) #-> '10___' (force left alignment
 '{:^10}'.format(10) #-> '____10____' (center, pends to left
-'{:a>5}.format(10) #-> 'aaa10' (pads left with a, can be used with any char
+'{:a>5}'.format(10) #-> 'aaa10' (pads left with a, can be used with any char
 ```
 
 # Matrix Multiplication
