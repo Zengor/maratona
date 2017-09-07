@@ -43,7 +43,8 @@ Dada uma representação simples (lista de adjacência) de um grafo
              'F': ['C']
 			 
 ```
-Para usar pesos, podemos fazer cada entrada na lista de adjacência ser uma tupla (e.g `'A':[('B',10)]`), ou ter um segundo dicionário indexado por tuplas `(u,v)`. **Dependendo de como isso for feito, é necessário mudar várias implementações abaixo.** Por questão de simplicidade, estou assumindo que `weights` é um dicionário diferente
+Para usar pesos, podemos fazer cada entrada na lista de adjacência ser uma tupla (e.g `'A':[('B',10)]`), ou ter um segundo dicionário indexado por tuplas `(u,v)`. **Dependendo de como isso for feito, é necessário mudar várias implementações abaixo.** Por questão de simplicidade, estou assumindo que `weights` é um dicionário diferente.
+
 Uma implementação de nó que pode ser usada na estrutura acima (é hasheável):
 ```py
 class Node:
@@ -105,7 +106,7 @@ def kruskal(g, weights):
     set_lookup = { s:sets[i] for i,s in enumerate(vertices_iter(g)) }
     # queremos um priority queue das edges ordenados pelo maior peso
     # então precisamos inverter os pesos (heapq é ordenado pelo menor).
-    # para fazer uma maximum spanning tree, inverter o peso
+    # para fazer uma maximum spanning tree, trocar `-w` por só `w`
     edgeq = list((-w,e) for e,w in weights.items())
     heapify(edgeq)
     tree = []
