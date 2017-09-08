@@ -41,7 +41,7 @@ Dada uma representação simples (lista de adjacência) de um grafo
              'D': ['C'],
              'E': ['F'],
              'F': ['C']
-			 }
+            }
 ```
 Para usar pesos, podemos fazer cada entrada na lista de adjacência ser uma tupla (e.g `'A':[('B',10)]`), ou ter um segundo dicionário indexado por tuplas `(u,v)`. **Dependendo de como isso for feito, é necessário mudar várias implementações abaixo.** Por questão de simplicidade, estou assumindo que `weights` é um dicionário diferente.
 
@@ -73,9 +73,33 @@ def edges_iter(g):
 ```
 Seguem implementações básicas de BFS e DFS, que devem ser modificadas dependendo do uso, especialmente pra ficarem mais limpas (i.e, dependendo se quisermos caminhos, distâncias, etc)
 ```py
-def bfs(g):
+def bfs(g, start):
+    from collections import deque
+    d = {start:0}
+    p = {start:None}
+    queue = deque(start)
+    while queue:
+        curr = queue.popleft()
+        for v in (adj for adj in g[curr] if adj not in distance):
+            d[v] = distance[curr] + 1
+            p[v] = curr
+            queue.append(v)
+    return d, p
 
-def dfs(g):
+# segue somente uma transcrição básica do dfs-visit do cormen,
+# que é mais fácil de generalizar pra outros algoritmos
+# muitos dos parametros podem ser tirados dependendo do escopo
+def dfs_visit(g, start, d, p, f, visited=set()):
+    # assume-se que existe um 'time' no escopo superior
+    time = time + 1
+    d[start] = time
+    visited.add(start)
+    for v in (adj for adj in g[start] if adj not in visited):
+        p[v] = start
+        dfs_visit(g, v, d, p, f, visited=visited)
+    time = time + 1
+    f[start] = time
+    return d, p, f
 ```
 ## Disjoint set / Connected Components
 
@@ -139,6 +163,23 @@ O uso de `p` é espelhando a estrutura apresentada no Cormen, pode ser mais efic
 |Ciclos negativos | Não Detecta | Não Detecta | Detecta
 
 ## Dags com peso (baseado em ordenação topológica)
+A implementação abaixo não checa se o grafo realmente é um DAG ou não, porque isso torna a implementação da ordenação topológica bem mais simples. Alterar se checagem for necessária.
+```py
+def dag_sssp(g, weight, start):
+    import math
+    def topological(g, s, visited=set()):
+        yield s
+        visited.add(s)
+        for v in (adj for adj in g[s] if adj not in visited):
+            yield from topological(g, v, visited)
+    d = { v:math.inf for v in vertices_iter(g) }
+    d[start] = 0
+    p = { start:None}
+    for u in topological(g, start):
+        for v in g[u]:
+            relax(u,v,weight)
+```
+
 ## Bellman-Ford
 
 ```py
