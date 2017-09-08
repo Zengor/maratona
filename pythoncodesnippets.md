@@ -41,7 +41,7 @@ Dada uma representação simples (lista de adjacência) de um grafo
              'D': ['C'],
              'E': ['F'],
              'F': ['C']
-			 
+			 }
 ```
 Para usar pesos, podemos fazer cada entrada na lista de adjacência ser uma tupla (e.g `'A':[('B',10)]`), ou ter um segundo dicionário indexado por tuplas `(u,v)`. **Dependendo de como isso for feito, é necessário mudar várias implementações abaixo.** Por questão de simplicidade, estou assumindo que `weights` é um dicionário diferente.
 
@@ -70,8 +70,11 @@ def vertices_iter(g):
     return g.keys()
 def edges_iter(g):
     return ((a,b) for a,v in g.items() for b in v)
-
+```
+Seguem implementações básicas de BFS e DFS, que devem ser modificadas dependendo do uso, especialmente pra ficarem mais limpas (i.e, dependendo se quisermos caminhos, distâncias, etc)
+```py
 def bfs(g):
+
 def dfs(g):
 ```
 ## Disjoint set / Connected Components
@@ -117,8 +120,57 @@ def kruskal(g, weights):
             union(u,v)
 ```
 # Shortest Paths
+Os algoritmos a seguir geralmente usam a função `relax` apresentada aqui. Ela foi feita para ser declarada dentro da função do algoritmo em si (assume um, `weight`, `d` (distância, delta) e `p` (predecessor) do escopo externo).
+```py
+def relax(u,v):
+    if d[v] > d[u] + weight[(u,v)]:
+        d[v] = d[u] + weight[(u,v)]
+        p[v] = u
+```
+O uso de `p` é espelhando a estrutura apresentada no Cormen, pode ser mais eficiente trocar por outra coisa dependendo do caso.
+## Comparações
+
+|      | BFS    | Dijkstra    | Bellman-Ford |
+|------|--------|-------------|--------------|
+|Big-O | O(V+E) | O((V+E)logV)| O(VE)   |
+|Sem Peso|Melhor | Bom | Ruim |
+|Com Peso|Só árvore e DAG| Melhor | Bom |
+|Pesos negativos | Erra | Erra | Melhor|
+|Ciclos negativos | Não Detecta | Não Detecta | Detecta
+
 ## Dags com peso (baseado em ordenação topológica)
+## Bellman-Ford
+
+```py
+def bellman_ford(g, start, weight):
+    ## def relax
+    from itertools import repeat
+    d = { v:INFINITE for v in vertices_iter(g) }
+    d[start] = 0
+    p = { start:None}
+    for (u,v) in repeat(edges_iter(g), len(vertices(g))-1):
+        relax(u,v)
+    if any(d[v] > d[u] + weight[(u,v)] for (u,v) in edges_iter(g)):
+        raise ValueError("Ciclo Negativo")
+    return d, p
+```
 ## Dijkstra
+ 
+```py
+def dijkstra(g, start, weight):
+    ## def relax
+    d = { v:INFINITE for v in vertices_iter(g) }
+    d[start] = 0
+    p = { start:None}
+    verts = set(vertices_iter(g))
+    visited = set()
+    while visited != verts:
+        curr = min(set(d), key=d.get)
+        visited.add(curr)
+        for v in g[curr]:
+            relax(v,curr)
+    return d, p
+```
 ## Floyd-Warshal
 
 # Format strings
@@ -187,7 +239,7 @@ d = math.sqrt((x2-x1)**2 + (y2-y1)**2)
 ## Triangle
 Area
 ```py
-area = (base * height)/2`
+area = (base * height)/2
 # ibid, usando só lados:
 semiper = (a + b + c)/2 #semiperimeter
 area = math.sqrt(semiper * (semiper - a) * (semiper - b) * (semiper - c))
