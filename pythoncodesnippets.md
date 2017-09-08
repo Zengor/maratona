@@ -213,15 +213,48 @@ Espaços vazios representados como `_`  nos comentários
 '{:^10}'.format(10) #-> '____10____' (center, pends to left
 '{:a>5}'.format(10) #-> 'aaa10' (pads left with a, can be used with any char
 ```
+# General Math 
+## Sieve of Eratosthenes
 
-# Matrix Multiplication
+```py
+def sieve(n):
+    non_primes = set()
+    primes = []
+    for i in range(2, n+1):
+        if i not in non_prime:
+            #yield i
+            primes.append(i)
+            non_primes.update(range(i*i, n+1, i))
+    return primes
+```
+
+## Prime Factorization
+
+```py
+def prime_factors(n):
+    primes = sieve(n)
+    if n in primes:
+        return {n:1}
+    factors = defaultdict(int)
+    primes = iter(primes)
+    pf = next(primes)
+    while (n != 1):
+        print(n, pf)
+        while n % pf == 0:
+            n = n // pf
+            factors[pf] += 1
+        pf = next(primes)
+    return factors
+```
+
+## Matrix Multiplication
 
 ```py
 # naive
 def mat_mult(A, B):
     return [[sum(a*b for a,b in zip(Arow,Bcol)) for Bcol in zip(*B)] for Arow in A]
 ```
-# Gaussian Elimination
+## Gaussian Elimination
 
 ```py
 def gauss(A):
