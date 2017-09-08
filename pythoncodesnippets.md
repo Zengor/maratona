@@ -172,6 +172,27 @@ def dijkstra(g, start, weight):
     return d, p
 ```
 ## Floyd-Warshal
+All-pairs shortest paths, O(V³), usável pra casos pequenos e fácil de implementar. O código abaixo assume a mesma representação dos anteriores, mas dá para cortar parte do overhead se o grafo já for ldio como matriz de adjacencia.
+```py
+def floydwarshal(g, weight):
+    from itertools import product
+    from collections import defaultdict
+    d = { v:defaultdict(INFINITE) for v in vertices_iter(g) }
+    p = { v:defaultdict(None) for v in vertices_iter(g) }
+    for (u,v) in product(vertices_iter(g), repeat=2):
+        if u == v:
+            d[u][v] = 0
+        elif (u,v) in weight:
+            d[u][v] = weight[(u,v)]
+            p[u][v] = u
+    ################
+    for (k,i,j) in product(vertices_iter(g), repeat=3):
+        new = d[i][k] + d[k][j]
+        if new < d[i][j]:
+            d[i][j] = new
+            p[i][j] = p[k][j]
+    return d, p
+```
 
 # Format strings
 ## Basic
