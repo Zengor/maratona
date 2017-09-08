@@ -145,7 +145,8 @@ O uso de `p` é espelhando a estrutura apresentada no Cormen, pode ser mais efic
 def bellman_ford(g, start, weight):
     ## def relax
     from itertools import repeat
-    d = { v:INFINITE for v in vertices_iter(g) }
+	import math
+    d = { v:math.inf for v in vertices_iter(g) }
     d[start] = 0
     p = { start:None}
     for (u,v) in repeat(edges_iter(g), len(vertices(g))-1):
@@ -159,7 +160,8 @@ def bellman_ford(g, start, weight):
 ```py
 def dijkstra(g, start, weight):
     ## def relax
-    d = { v:INFINITE for v in vertices_iter(g) }
+	import math
+    d = { v:math.inf for v in vertices_iter(g) }
     d[start] = 0
     p = { start:None}
     verts = set(vertices_iter(g))
@@ -177,7 +179,8 @@ All-pairs shortest paths, O(V³), usável pra casos pequenos e fácil de impleme
 def floydwarshal(g, weight):
     from itertools import product
     from collections import defaultdict
-    d = { v:defaultdict(INFINITE) for v in vertices_iter(g) }
+	import math
+    d = { v:defaultdict(math.inf) for v in vertices_iter(g) }
     p = { v:defaultdict(None) for v in vertices_iter(g) }
     for (u,v) in product(vertices_iter(g), repeat=2):
         if u == v:
