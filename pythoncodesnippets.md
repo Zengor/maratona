@@ -167,7 +167,9 @@ A implementação abaixo não checa se o grafo realmente é um DAG ou não, porq
 ```py
 def dag_sssp(g, weight, start):
     import math
-    def topological(g, s, visited=set()):
+    def topological(g, s, visited=None):
+	    if not visited:
+	        visited = set()
         yield s
         visited.add(s)
         for v in (adj for adj in g[s] if adj not in visited):
